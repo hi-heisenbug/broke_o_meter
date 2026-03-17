@@ -1208,6 +1208,28 @@ function setThreshold(btn, val) {
   track('threshold_selected', { threshold: val });
 }
 
+function showAmountEditor(labelText, initialValue) {
+  $('manual-fallback').classList.add('show');
+  const label = document.querySelector('#manual-fallback .manual-fallback-label');
+  if (label) label.textContent = labelText;
+  const input = $('manual-input');
+  // Clone to remove any previously attached listeners
+  const fresh = input.cloneNode(true);
+  input.parentNode.replaceChild(fresh, input);
+  fresh.value = (initialValue !== undefined && initialValue !== null) ? String(initialValue) : '';
+  fresh.addEventListener('input', () => {
+    const v = parseFloat(fresh.value);
+    if (!isNaN(v) && v >= 0) {
+      rawBalance       = v;
+      rawCurrency      = currentCurrency;
+      extractedBalance = v;
+      $('extracted-value').textContent = formatAmount(v);
+      $('extracted-wrap').classList.add('show');
+      $('proof-panel').classList.add('unlocked');
+    }
+  });
+}
+
 const uploadZone = $('upload-zone');
 const fileInput  = $('file-input');
 
@@ -1243,21 +1265,6 @@ async function processFile(file) {
   updateProgress(10, 'Loading OCR engine...');
 
   try {
-    if (!window.Tesseract) {
-      const cdns = [
-        'https://unpkg.com/tesseract.js@5/dist/tesseract.min.js',
-        'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
-        'https://unpkg.com/tesseract.js@4/dist/tesseract.min.js',
-      ];
-      let loaded = false;
-      for (const url of cdns) {
-        try {
-          await loadScript(url);
-          if (window.Tesseract) { loaded = true; break; }
-        } catch (e) { /* try next */ }
-      }
-      if (!loaded) throw new Error('Could not load OCR engine. Check your internet connection.');
-    }
     updateProgress(20, 'Ready');
     await showLog('l2', 300);
     updateProgress(35, 'Preprocessing...');
@@ -1266,13 +1273,57 @@ async function processFile(file) {
     await showLog('l3', 300);
     updateProgress(55, 'Running OCR...');
 
-    const { data: { text } } = await Tesseract.recognize(processed, 'eng', {
-      logger: m => {
-        if (m.status === 'recognizing text') {
-          updateProgress(Math.round(55 + m.progress * 30), 'Recognising text...');
+    let text = null;
+
+    // Try Chrome Shape Detection API first (native, instant, no download)
+    if ('TextDetector' in window) {
+      try {
+        updateProgress(60, 'Using native OCR...');
+        const textDetector = new TextDetector();
+        const bitmap = await createImageBitmap(processed);
+        const detections = await textDetector.detect(bitmap);
+        if (detections.length > 0) {
+          text = detections.map(d => d.rawValue).join('\n');
+          track('ocr_engine', { engine: 'native' });
+          updateProgress(88, 'Scanning for amounts...');
         }
+      } catch (e) {
+        console.warn('Native TextDetector failed, falling back to Tesseract:', e);
+        text = null;
       }
-    });
+    }
+
+    // Fall back to Tesseract if native OCR unavailable or returned nothing
+    if (!text) {
+      if (!window.Tesseract) {
+        const cdns = [
+          'https://unpkg.com/tesseract.js@5/dist/tesseract.min.js',
+          'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
+          'https://unpkg.com/tesseract.js@4/dist/tesseract.min.js',
+        ];
+        let loaded = false;
+        for (const url of cdns) {
+          try {
+            await loadScript(url);
+            if (window.Tesseract) { loaded = true; break; }
+          } catch (e) { /* try next */ }
+        }
+        if (!loaded) throw new Error('Could not load OCR engine. Check your internet connection.');
+      }
+      updateProgress(60, 'Running Tesseract OCR...');
+      const result = await Tesseract.recognize(processed, 'eng', {
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            updateProgress(Math.round(60 + m.progress * 28), 'Recognising text...');
+          }
+        },
+        tessedit_pageseg_mode: '6',
+        tessedit_char_whitelist: '0123456789.,₹$£€ ',
+      });
+      text = result.data.text;
+      track('ocr_engine', { engine: 'tesseract' });
+      updateProgress(88, 'Scanning for amounts...');
+    }
 
     updateProgress(88, 'Scanning for amounts...');
     await showLog('l4', 200);
@@ -1307,6 +1358,7 @@ async function processFile(file) {
       extractedBalance = balance;
       $('extracted-value').textContent = formatAmount(balance);
       $('extracted-wrap').classList.add('show');
+      showAmountEditor('On-device OCR may not be reliable for now. Edit amount if needed.', balance);
       $('proof-panel').classList.add('unlocked');
       $('proof-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } else {
@@ -1327,22 +1379,7 @@ async function processFile(file) {
 
 function showManualFallback() {
   track('manual_balance_used');
-  $('manual-fallback').classList.add('show');
-  const input = $('manual-input');
-  // Clone to remove any previously attached listeners
-  const fresh = input.cloneNode(true);
-  input.parentNode.replaceChild(fresh, input);
-  fresh.addEventListener('input', () => {
-    const v = parseFloat(fresh.value);
-    if (!isNaN(v) && v >= 0) {
-      rawBalance       = v;
-      rawCurrency      = currentCurrency;
-      extractedBalance = v;
-      $('extracted-value').textContent = formatAmount(v);
-      $('extracted-wrap').classList.add('show');
-      $('proof-panel').classList.add('unlocked');
-    }
-  });
+  showAmountEditor('Couldn\'t read it. Enter manually.', '');
 }
 
 async function preprocessImage(file) {
@@ -1645,6 +1682,23 @@ document.querySelectorAll('input[type="text"]').forEach(f => {
   f.addEventListener('focus', () => charsStage.classList.add('hiding'));
   f.addEventListener('blur',  () => charsStage.classList.remove('hiding'));
 });
+
+// Preload Tesseract while user is idle — avoids cold-start delay on upload
+(function preloadTesseract() {
+  const load = () => {
+    if (window.Tesseract) return;
+    const cdns = [
+      'https://unpkg.com/tesseract.js@5/dist/tesseract.min.js',
+      'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
+    ];
+    loadScript(cdns[0]).catch(() => loadScript(cdns[1]).catch(() => {}));
+  };
+  if (window.requestIdleCallback) {
+    requestIdleCallback(load, { timeout: 3000 });
+  } else {
+    setTimeout(load, 1500);
+  }
+})();
 
 const confettiColors = ['#93cb52','#1c9770','#bef3e2','#464646','#f2eeee','#7aaa3f'];
 function launchConfetti() {

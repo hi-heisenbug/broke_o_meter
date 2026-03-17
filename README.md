@@ -99,6 +99,8 @@ flowchart LR
 
 The balance is used during construction but is not present in the output string. The verifier re-derives `validityHash` independently for both `true` and `false` states and checks which one matches.
 
+This is a simulated Pedersen commitment + Fiat-Shamir scheme implemented with SHA-256 using the Web Crypto API. The proof string is a chain of hashes derived from `balance + salt + threshold`, while the balance itself never appears in output. During verification, the verifier re-derives expected hashes for both `broke = true` and `broke = false` and accepts whichever one matches.
+
 ---
 
 ### Verification logic
@@ -211,6 +213,27 @@ BOMPROOF:v3:T{threshold}:{commitShort}:{challengeShort}:{responseShort}:{validit
 | `metaHash` | 16 chars | SHA-256 of `commit:threshold:validity`, sliced |
 
 Balance is not present in any segment.
+
+---
+
+## Loopholes and caveats
+
+The demo has an intentional trust loophole: screenshots can be edited, backdated, or belong to someone else, so the input is not tamper-proof.
+
+Users can also edit the extracted amount after OCR, and can change it later before generating a proof.
+
+A real implementation would integrate with India's Account Aggregator framework so balance data is pulled directly from the bank source, leaving no room for screenshot forgery.
+
+This project is honest about scope: it is simulated ZK, not a full zk-SNARK circuit. The commitment-and-hash flow is cryptographically sound for this specific claim, but it does not provide the same formal guarantees as systems like Groth16 or PLONK.
+
+---
+
+## What makes it technically interesting
+
+- Entirely client-side: no server, no data leaves the browser.
+- Single HTML file: no framework, no build step.
+- Currency conversion support: fetches live rates and falls back gracefully.
+- Portable, human-readable proof format: `BOMPROOF:v3:T{threshold}:...`.
 
 ---
 
