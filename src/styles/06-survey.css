@@ -1,0 +1,33 @@
+/* ── Cert survey ────────────────────────────────────────────── */
+    .cert-survey {
+      margin-top: 18px; padding-top: 16px;
+      border-top: 1px solid var(--border); text-align: left;
+    }
+    .cert-survey-q {
+      font-size: 12px; font-weight: 500;
+      color: var(--ink-light); margin-bottom: 10px; display: block;
+    }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      padding: 5px 13px;
+      border: 1px solid rgba(0,0,0,0.09);
+      border-radius: 99px; background: transparent;
+      cursor: pointer;
+      font-size: 12px; font-weight: 500;
+      color: var(--ink-mid); transition: all 0.15s; user-select: none;
+    }
+    .chip:hover { border-color: var(--green); background: rgba(147,203,82,0.07); color: var(--ink); }
+    .chip.selected { background: var(--green); color: #fff; border-color: var(--green); }
+
+    /* ── Survey thanks ──────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(-3px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .survey-thanks {
+      font-size: 11px; color: var(--teal); font-weight: 500;
+      margin-top: 8px; animation: fadeUp 0.25s ease forwards; display: none;
+    }
+    .survey-thanks.show { display: block; }
+
+    

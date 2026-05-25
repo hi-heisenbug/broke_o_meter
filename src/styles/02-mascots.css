@@ -1,0 +1,137 @@
+/* ── Mascot strip — same bg, flows seamlessly ───────────────── */
+    .chars-strip {
+      background: var(--bg);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-top: 8px;
+      overflow: hidden;
+      height: 96px;
+    }
+
+    .chars-stage {
+      position: relative;
+      width: 280px;
+      height: 90px;
+      transform-origin: bottom center;
+    }
+
+    .mc-purple {
+      position: absolute; left: 52px; bottom: 0;
+      width: 60px; height: 88px;
+      background: #6B3FFF;
+      border-radius: 8px 8px 2px 2px;
+    }
+    .mc-purple .m-eyes {
+      position: absolute; top: 14px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 9px;
+    }
+    .mc-black {
+      position: absolute; right: 32px; bottom: 0;
+      width: 48px; height: 70px;
+      background: #2a2a2a;
+      border-radius: 6px 6px 2px 2px; z-index: 3;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.12);
+    }
+    .mc-black .m-eyes {
+      position: absolute; top: 12px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 8px;
+    }
+    .mc-orange {
+      position: absolute; left: 0; bottom: 0;
+      width: 76px; height: 62px;
+      background: #FF7A2F;
+      border-radius: 50% 50% 0 0; z-index: 4;
+    }
+    .mc-orange .m-eyes {
+      position: absolute; top: 18px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 10px;
+    }
+    .mc-orange .m-mouth {
+      position: absolute; bottom: 12px; left: 50%;
+      transform: translateX(-50%);
+      width: 16px; height: 8px;
+      border-bottom: 2.5px solid #000;
+      border-left: 2.5px solid #000;
+      border-right: 2.5px solid #000;
+      border-radius: 0 0 12px 12px;
+      transition: all 0.4s ease;
+    }
+    .mc-orange.sad .m-mouth {
+      border-bottom: none;
+      border-top: 2.5px solid #000;
+      border-radius: 12px 12px 0 0;
+      bottom: 10px;
+    }
+    .mc-orange.celebrate .m-mouth { width: 20px; height: 10px; }
+    .mc-yellow {
+      position: absolute; right: 0; bottom: 0;
+      width: 44px; height: 62px;
+      background: #F5C400;
+      border-radius: 22px 22px 4px 4px; z-index: 2;
+    }
+    .mc-yellow .m-eye-single {
+      position: absolute; top: 22px; left: 12px;
+      width: 8px; height: 8px;
+      background: #000; border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+    .mc-yellow .m-beak {
+      position: absolute; top: 27px; right: -8px;
+      width: 14px; height: 3px;
+      background: #000; border-radius: 2px;
+    }
+
+    .m-eye {
+      width: 9px; height: 9px;
+      background: #fff; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; transition: transform 0.2s ease;
+    }
+    .m-eye .m-pupil {
+      width: 5px; height: 5px;
+      background: #000; border-radius: 50%;
+      position: absolute; transition: transform 0.15s ease;
+    }
+    .m-eye-lg { width: 12px; height: 12px; }
+    .m-eye-lg .m-pupil { width: 6px; height: 6px; }
+
+    @keyframes m-blink {
+      0%,92%,100% { transform: scaleY(1); }
+      96% { transform: scaleY(0.05); }
+    }
+    .m-eye { animation: m-blink 3.5s ease-in-out infinite; }
+    .m-eye:nth-child(2) { animation-delay: 0.07s; }
+
+    @keyframes m-floatA { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+    @keyframes m-floatB { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    .mc-purple { animation: m-floatA 4s ease-in-out infinite; }
+    .mc-black  { animation: m-floatB 3.6s ease-in-out infinite 0.4s; }
+    .mc-yellow { animation: m-floatB 4.2s ease-in-out infinite 0.8s; }
+    .mc-orange { animation: m-floatA 3.8s ease-in-out infinite 1.2s; }
+
+    @keyframes m-celebrate {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      20% { transform: translateY(-16px) rotate(-5deg); }
+      40% { transform: translateY(-12px) rotate(4deg); }
+      60% { transform: translateY(-18px) rotate(-3deg); }
+      80% { transform: translateY(-8px) rotate(2deg); }
+    }
+    .chars-stage.celebrate .mc-purple,
+    .chars-stage.celebrate .mc-black,
+    .chars-stage.celebrate .mc-yellow,
+    .chars-stage.celebrate .mc-orange {
+      animation: m-celebrate 0.8s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    .chars-stage.celebrate .mc-black  { animation-delay: 0.08s; }
+    .chars-stage.celebrate .mc-yellow { animation-delay: 0.16s; }
+    .chars-stage.celebrate .mc-orange { animation-delay: 0.24s; }
+    .chars-stage.hiding .mc-orange .m-eyes .m-eye,
+    .chars-stage.hiding .mc-purple .m-eyes .m-eye {
+      animation: none; transform: scaleY(0.05);
+    }
+
+    

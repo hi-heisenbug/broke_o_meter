@@ -1,0 +1,39 @@
+/* ── Sorry toast ────────────────────────────────────────────── */
+    .sorry-toast {
+      position: fixed;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--card);
+      border-left: 3px solid var(--green);
+      border-radius: 14px;
+      padding: 13px 22px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      font-style: italic;
+      color: var(--ink-mid);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .sorry-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .sorry-toast.hide {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-10px);
+    }
+    @media (max-width: 540px) {
+      .body-wrap { padding: 24px 16px 64px; }
+      .card { padding: 22px 18px; border-radius: 18px; }
+      .how-steps { grid-template-columns: 1fr; gap: 8px; }
+      .privacy-toggle-row { grid-template-columns: 1fr; }
+      .cert { padding: 26px 18px; }
+      .header { padding: 40px 20px 20px; }
+    }
+  

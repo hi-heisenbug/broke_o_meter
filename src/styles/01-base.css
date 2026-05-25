@@ -1,0 +1,55 @@
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:      #93cb52;
+      --green-dark: #7aaa3f;
+      --teal:       #1c9770;
+      --teal-light: #bef3e2;
+      --warm-blush: #f2eeee;
+      --bg:         #ffffff;
+      --card:       #ffffff;
+      --ink:        #1a1a1a;
+      --ink-mid:    #4a4a4a;
+      --ink-light:  #9a9a9a;
+      --border:     rgba(0,0,0,0.08);
+      --shadow-sm:  0 1px 3px rgba(0,0,0,0.05), 0 6px 20px rgba(0,0,0,0.06);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header — same bg as page, seamless ─────────────────────── */
+    .header {
+      background: var(--bg);
+      padding: 56px 24px 28px;
+      text-align: center;
+    }
+
+    .header-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: clamp(38px, 9vw, 64px);
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -2px;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+    .header-title span { color: var(--green); }
+
+    .header-sub {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--ink-light);
+      letter-spacing: -0.01em;
+    }
+
+    

@@ -1,0 +1,45 @@
+/* ── Layout ─────────────────────────────────────────────────── */
+    .body-wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 32px 20px 100px;
+    }
+
+    /* ── Card ───────────────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 10px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+
+    /* ── How it works — 3-column grid ──────────────────────────── */
+    .how-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .how-step {
+      background: rgba(0,0,0,0.02);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 14px 16px;
+      text-align: center;
+    }
+    .how-num {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 28px; font-weight: 800;
+      color: var(--green); line-height: 1;
+      display: block; margin-bottom: 8px;
+    }
+    .how-text {
+      font-size: 12px;
+      color: var(--ink-mid);
+      line-height: 1.55;
+      font-weight: 400;
+      display: block;
+    }
+
+    

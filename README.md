@@ -231,9 +231,12 @@ This project is honest about scope: it is simulated ZK, not a full zk-SNARK circ
 ## What makes it technically interesting
 
 - Entirely client-side: no server, no data leaves the browser.
-- Single HTML file: no framework, no build step.
+- Modular ES-module architecture with a pure, unit-tested ZK core (`src/lib/zkp.js`).
+- Runs unbundled as native ES modules, *and* ships a Vite production build.
 - Currency conversion support: fetches live rates and falls back gracefully.
 - Portable, human-readable proof format: `BOMPROOF:v3:T{threshold}:...`.
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full module map.
 
 ---
 
@@ -241,30 +244,41 @@ This project is honest about scope: it is simulated ZK, not a full zk-SNARK circ
 
 | Piece | What |
 |---|---|
-| OCR | [Tesseract.js](https://github.com/naptha/tesseract.js) v5, loaded dynamically |
+| OCR | [Tesseract.js](https://github.com/naptha/tesseract.js) v5, loaded dynamically (native `TextDetector` first) |
 | Crypto | Web Crypto API — SHA-256 |
 | ZKP | Pedersen commitment + Fiat-Shamir (simulated) |
 | Currency rates | [@fawazahmed0/currency-api](https://github.com/fawazahmed0/exchange-api) via jsDelivr |
 | Fonts | DM Sans, Inter via Google Fonts |
+| Build | [Vite](https://vitejs.dev) (optional — source runs unbundled too) |
+| Tests | `node --test` (zero-dependency, WebCrypto) |
 | Hosting | Vercel static |
 
-No framework. No build step. One HTML file.
+No runtime framework. Plain ES modules. Build step optional.
 
 ---
 
 ## Running locally
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/broke-o-meter.git
-cd broke-o-meter
-open index.html
+git clone https://github.com/hi-heisenbug/broke_o_meter.git
+cd broke_o_meter
+npm install
+npm run dev        # Vite dev server with HMR
 ```
 
-Or with a local server (recommended so Tesseract.js loads correctly):
+Other useful scripts:
 
 ```bash
-npx serve .
+npm test           # unit tests for the ZK proof core
+npm run lint       # eslint
+npm run build      # production bundle into dist/
+npm run preview    # preview the production build
 ```
+
+Because the source is plain native ES modules, you can also serve it without a
+build step — any static server works (e.g. `npx serve .`). Opening `index.html`
+straight from the filesystem (`file://`) will not work, since browsers block ES
+module loading over `file://`; use a local server.
 
 ---
 
